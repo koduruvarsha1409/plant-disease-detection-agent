@@ -170,32 +170,33 @@ if uploaded_file is not None:
         disease = prediction[0]
 
         
-# Separate crop name and disease name
 
-if "___" in disease:
-    crop, disease_name = disease.split("___", 1)
+        # ---------------------------------
+        # 5. SEPARATE CROP NAME AND DISEASE
+        # ---------------------------------
 
-else:
-    # Handle labels without the standard PlantVillage separator
-    crop_names = [
-        "Apple", "Blueberry", "Cherry", "Corn_(maize)",
-        "Grape", "Orange", "Peach", "Pepper,_bell",
-        "Potato", "Raspberry", "Soybean", "Squash",
-        "Strawberry", "Tomato"
-    ]
+        if "___" in disease:
+            crop, disease_name = disease.split("___", 1)
 
-    crop = "Unknown"
-    disease_name = disease
+        else:
+            crop_names = [
+                "Apple", "Blueberry", "Cherry", "Corn_(maize)",
+                "Grape", "Orange", "Peach", "Pepper,_bell",
+                "Potato", "Raspberry", "Soybean", "Squash",
+                "Strawberry", "Tomato"
+            ]
 
-    for name in sorted(crop_names, key=len, reverse=True):
-        if disease.lower().startswith(name.lower() + "_"):
-            crop = name
-            disease_name = disease[len(name) + 1:]
-            break
+            crop = "Unknown"
+            disease_name = disease
 
-crop = crop.replace("_", " ").replace(",", "")
-disease_name = disease_name.replace("_", " ")
+            for name in sorted(crop_names, key=len, reverse=True):
+                if disease.lower().startswith(name.lower() + "_"):
+                    crop = name
+                    disease_name = disease[len(name) + 1:]
+                    break
 
+        crop = crop.replace("_", " ").replace(",", "")
+        disease_name = disease_name.replace("_", " ")
 
         # ---------------------------------
         # 6. DISPLAY PREDICTION
@@ -214,12 +215,11 @@ disease_name = disease_name.replace("_", " ")
             st.metric("Predicted Condition", disease_name)
 
         if "healthy" in disease.lower():
-
             st.success("The model classified this plant as healthy.")
 
         else:
-
             st.warning("Possible plant disease detected.")
+
 
         # ---------------------------------
         # 7. TREATMENT RECOMMENDATIONS
