@@ -1,3 +1,4 @@
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -6,6 +7,7 @@ import joblib
 from PIL import Image
 from datetime import datetime
 from pathlib import Path
+
 
 # ---------------------------------
 # 1. PAGE CONFIGURATION
@@ -26,6 +28,7 @@ st.write(
 
 st.divider()
 
+
 # ---------------------------------
 # 2. LOAD TRAINED SVM MODEL
 # ---------------------------------
@@ -42,6 +45,7 @@ try:
 except Exception as e:
     st.error("Unable to load the trained model.")
     st.write("Check whether plant_disease_model.pkl is uploaded.")
+    st.write("Error:", e)
     st.stop()
 
 
@@ -164,21 +168,76 @@ if uploaded_file is not None:
         # Reshape for SVM prediction
         features = features.reshape(1, -1)
 
-        # Predict disease
+
+        # ---------------------------------
+        # 6. PREDICT DISEASE USING SVM
+        # ---------------------------------
+
         prediction = model.predict(features)
 
         disease = prediction[0]
 
-        
 
         # ---------------------------------
-        # 5. SEPARATE CROP NAME AND DISEASE
+        # 7. MODEL DEBUG INFORMATION
+        # ---------------------------------
+
+        st.divider()
+
+        st.header("Model Debug Information")
+
+        st.write("Raw Model Prediction:", disease)
+
+        st.write("Total Model Classes:", len(model.classes_))
+
+        with st.expander("View All Available Model Classes"):
+
+            st.write(list(model.classes_))
+
+        # Get SVM decision scores
+        scores = model.decision_function(features)
+
+        # Handle binary classification
+        if scores.ndim == 1:
+
+            scores = np.column_stack([
+                -scores,
+                scores
+            ])
+
+        # Find top 5 prediction scores
+        top_indices = np.argsort(scores[0])[::-1][:5]
+
+        debug_results = pd.DataFrame({
+
+            "Disease Class": model.classes_[top_indices],
+
+            "SVM Score": scores[0][top_indices]
+
+        })
+
+        st.subheader("Top 5 Prediction Scores")
+
+        st.dataframe(
+            debug_results,
+            use_container_width=True
+        )
+
+        st.caption(
+            "SVM scores are decision scores, not prediction probabilities."
+        )
+
+
+        # ---------------------------------
+        # 8. SEPARATE CROP NAME AND DISEASE
         # ---------------------------------
 
         if "___" in disease:
+
             crop, disease_name = disease.split("___", 1)
 
         else:
+
             crop_names = [
                 "Apple", "Blueberry", "Cherry", "Corn_(maize)",
                 "Grape", "Orange", "Peach", "Pepper,_bell",
@@ -187,19 +246,26 @@ if uploaded_file is not None:
             ]
 
             crop = "Unknown"
+
             disease_name = disease
 
             for name in sorted(crop_names, key=len, reverse=True):
+
                 if disease.lower().startswith(name.lower() + "_"):
+
                     crop = name
+
                     disease_name = disease[len(name) + 1:]
+
                     break
 
         crop = crop.replace("_", " ").replace(",", "")
+
         disease_name = disease_name.replace("_", " ")
 
+
         # ---------------------------------
-        # 6. DISPLAY PREDICTION
+        # 9. DISPLAY PREDICTION
         # ---------------------------------
 
         st.divider()
@@ -209,20 +275,28 @@ if uploaded_file is not None:
         col1, col2 = st.columns(2)
 
         with col1:
+
             st.metric("Detected Crop", crop)
 
         with col2:
+
             st.metric("Predicted Condition", disease_name)
 
         if "healthy" in disease.lower():
-            st.success("The model classified this plant as healthy.")
+
+            st.success(
+                "The model classified this plant as healthy."
+            )
 
         else:
-            st.warning("Possible plant disease detected.")
+
+            st.warning(
+                "Possible plant disease detected."
+            )
 
 
         # ---------------------------------
-        # 7. TREATMENT RECOMMENDATIONS
+        # 10. TREATMENT RECOMMENDATIONS
         # ---------------------------------
 
         st.header("3. Treatment Recommendations")
@@ -233,8 +307,9 @@ if uploaded_file is not None:
 
             st.write("✅", recommendation)
 
+
         # ---------------------------------
-        # 8. SAVE CROP HEALTH REPORT
+        # 11. SAVE CROP HEALTH REPORT
         # ---------------------------------
 
         report = {
@@ -272,11 +347,13 @@ if uploaded_file is not None:
 
         all_reports.to_csv(report_file, index=False)
 
-        st.success("Crop Health Report Saved Successfully!")
+        st.success(
+            "Crop Health Report Saved Successfully!"
+        )
 
 
 # ---------------------------------
-# 9. CROP HEALTH MONITORING REPORTS
+# 12. CROP HEALTH MONITORING REPORTS
 # ---------------------------------
 
 st.divider()
@@ -289,7 +366,10 @@ if report_file.exists():
 
     reports = pd.read_csv(report_file)
 
-    st.metric("Total Crop Reports", len(reports))
+    st.metric(
+        "Total Crop Reports",
+        len(reports)
+    )
 
     st.dataframe(
         reports,
@@ -301,19 +381,26 @@ if report_file.exists():
     ).encode("utf-8")
 
     st.download_button(
+
         label="Download Crop Health Reports",
+
         data=csv_data,
+
         file_name="crop_health_reports.csv",
+
         mime="text/csv"
+
     )
 
 else:
 
-    st.info("No crop health reports available yet.")
+    st.info(
+        "No crop health reports available yet."
+    )
 
 
 # ---------------------------------
-# 10. FOOTER
+# 13. FOOTER
 # ---------------------------------
 
 st.divider()
