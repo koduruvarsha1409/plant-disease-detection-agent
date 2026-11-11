@@ -35,7 +35,7 @@ st.divider()
 # 2. LOAD TRAINED MODEL
 # ==========================================
 
-MODEL_PATH = "plant_disease_model.pkl"
+MODEL_PATH = "plant_disease_model(2).pkl"
 
 
 @st.cache_resource
