@@ -35,6 +35,7 @@ st.divider()
 # 2. LOAD TRAINED MODEL
 # ==========================================
 
+
 MODEL_PATH = "plant_disease_model(2).pkl"
 
 
@@ -56,9 +57,10 @@ try:
 
 except Exception as e:
     st.error("Unable to load the trained model.")
-    st.write("Make sure plant_disease_model.pkl is in your project folder.")
+    st.write("Make sure plant_disease_model(2).pkl is in your project folder.")
     st.code(str(e))
     st.stop()
+
 
 
 # ==========================================
