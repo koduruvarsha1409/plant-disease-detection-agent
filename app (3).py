@@ -42,7 +42,7 @@ st.write("Files available:", os.listdir("."))
 # ==========================================
 
 
-MODEL_PATH = "plant_disease_model(2).pkl"
+MODEL_PATH = "plant_disease_model (2).pkl"
 
 
 @st.cache_resource
