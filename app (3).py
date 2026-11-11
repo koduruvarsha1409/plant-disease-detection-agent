@@ -31,12 +31,6 @@ st.write(
 st.divider()
 
 
-import os
-
-st.write("Current working directory:", os.getcwd())
-st.write("Files available:", os.listdir("."))
-
-
 # ==========================================
 # 2. LOAD TRAINED MODEL
 # ==========================================
